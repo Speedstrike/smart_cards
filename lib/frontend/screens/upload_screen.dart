@@ -119,6 +119,11 @@ class _UploadScreenState extends State<UploadScreen> {
                               fontSize: 16,
                               color: CupertinoColors.activeBlue
                             )
+                          ),
+                          SizedBox(height: 100),
+                          CupertinoButton.filled(
+                            child: Text(Constants.continueButtonText),
+                            onPressed: () {}
                           )
                         ]
                       ]

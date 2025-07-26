@@ -59,7 +59,7 @@ class _ScanScreenState extends State<ScanScreen> {
           child: Icon(
             CupertinoIcons.back,
             color: CupertinoColors.activeBlue,
-            size: 40,
+            size: 40
           ),
           onPressed: () {
             Navigator.of(context).pop();
@@ -123,7 +123,25 @@ class _ScanScreenState extends State<ScanScreen> {
                           Padding(
                             padding: const EdgeInsets.only(top: 16),
                             child: Image.file(_scannedImage!)
+                          ),
+                        if (_scannedImage != null) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.file(
+                                _scannedImage!,
+                                height: 200,
+                                fit: BoxFit.cover
+                              )
+                            )
+                          ),
+                          SizedBox(height: 100),
+                          CupertinoButton.filled(
+                            child: Text(Constants.continueButtonText),
+                            onPressed: () {}
                           )
+                        ]
                       ]
                     )
                   )

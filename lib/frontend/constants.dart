@@ -39,4 +39,6 @@ class Constants {
 
   static const String uploadInstructions = 'Select files to upload to generate flashcards';
   static const String scanInstructions = 'Scan your notes, assignment, or textbook page to create a deck';
+
+  static const String continueButtonText = 'Generate flashcards';
 }
