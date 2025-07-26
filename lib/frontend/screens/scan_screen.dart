@@ -21,18 +21,32 @@
 // SOFTWARE.
 import 'package:flutter/cupertino.dart';
 
-import 'package:smart_cards/frontend/screens/scan_screen.dart';
-import 'package:smart_cards/frontend/screens/upload_screen.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'dart:io';
 
 import '../constants.dart';
-import '../flashcard_deck.dart';
-import '../gradient_button.dart';
 
-class CreateScreen extends StatelessWidget {
-  final List<FlashcardDeck> decks = [];
-  static final double buttonHeight = 128;
+class ScanScreen extends StatefulWidget {
+  const ScanScreen({super.key});
 
-  CreateScreen({super.key});
+  @override
+  State<ScanScreen> createState() => _ScanScreenState();
+}
+
+class _ScanScreenState extends State<ScanScreen> {
+  String? _fileName;
+  File? _scannedImage;
+
+  Future<void> _scanImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        _scannedImage = File(pickedFile.path);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +59,7 @@ class CreateScreen extends StatelessWidget {
           child: Icon(
             CupertinoIcons.back,
             color: CupertinoColors.activeBlue,
-            size: 40
+            size: 40,
           ),
           onPressed: () {
             Navigator.of(context).pop();
@@ -63,7 +77,7 @@ class CreateScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    Constants.createDeckTitle,
+                    Constants.scanTitle,
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -72,53 +86,46 @@ class CreateScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    Constants.createDeckSubtitle,
+                    Constants.scanInstructions,
                     style: TextStyle(
                       fontSize: 20,
                       color: CupertinoColors.systemBackground
                     )
                   ),
-                  SizedBox(height: 25)
-                ]
-              )
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  GradientButton(
-                    icon: CupertinoIcons.camera,
-                    title: Constants.scanTitle,
-                    description: Constants.scanSubtitle,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        CupertinoPageRoute(
-                          builder: (context) => const ScanScreen()
-                        )
-                      );
-                    }
-                  ),
-                  SizedBox(height: 20),
-                  GradientButton(
-                    icon: CupertinoIcons.doc,
-                    title: Constants.uploadTitle,
-                    description: Constants.uploadSubtitle,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        CupertinoPageRoute(
-                          builder: (context) => const UploadScreen()
-                        )
-                      );
-                    }
-                  ),
-                  SizedBox(height: 20),
-                  GradientButton(
-                    icon: CupertinoIcons.lightbulb,
-                    title: Constants.aiTitle,
-                    description: Constants.aiSubtitle,
-                    onTap: () {
-                      // TODO
-                    }
+                  SizedBox(height: 175),
+                  Center(
+                    child: Column(
+                      children: [
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: _scanImage,
+                          child: Icon(
+                            CupertinoIcons.camera_on_rectangle,
+                            size: 100,
+                            color: CupertinoColors.systemTeal
+                          )
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          Constants.scanTitle,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: CupertinoColors.systemTeal,
+                            fontWeight: FontWeight.w500
+                          )
+                        ),
+                        if (_fileName != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text('Selected file: $_fileName')
+                          ),
+                        if (_scannedImage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Image.file(_scannedImage!)
+                          )
+                      ]
+                    )
                   )
                 ]
               )

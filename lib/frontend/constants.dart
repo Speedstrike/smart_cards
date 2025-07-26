@@ -38,4 +38,5 @@ class Constants {
   static const String aiSubtitle = 'Use AI to generate flashcards from a topic or text you provide';
 
   static const String uploadInstructions = 'Select files to upload to generate flashcards';
+  static const String scanInstructions = 'Scan your notes, assignment, or textbook page to create a deck';
 }
