@@ -167,3 +167,4 @@ app.*.symbols
 # Go
 go.sum
 .env
+.vscode/
