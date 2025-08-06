@@ -1,66 +1,47 @@
-// MIT License
-//
-// # Copyright (c) 2025 Aaryan Karlapalem, Anirudh Konidala
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
 package main
 
 import (
-	"context"
-	"fmt"
+	"encoding/json"
 	"log"
-	"os"
-	"strconv"
+	"net/http"
+	"time"
 
-	"github.com/joho/godotenv"
-	"github.com/redis/go-redis/v9"
+	"github.com/gorilla/mux"
 )
 
-func ExampleClient_connect_basic() {
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		log.Fatal("could not load .env file")
-	}
+func main() {
+	router := mux.NewRouter()
+	router.Use(enableCORS)
+	connect()
 
-	ctx := context.Background()
+	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		response := map[string]string{
+			"status":  "OK",
+			"message": "flashcard backend is running",
+			"time":    time.Now().Format(time.RFC3339),
+		}
+		json.NewEncoder(w).Encode(response)
+	}).Methods("GET")
 
-	dbNoStr := os.Getenv("REDIS_DB_NO")
-	dbNo, err := strconv.ParseInt(dbNoStr, 10, 0)
-	if err != nil {
-		log.Fatalf("could not parse REDIS_DB_NO: %v", err)
-	}
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_ADDR"),
-		Username: os.Getenv("REDIS_USERNAME"),
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       int(dbNo),
-	})
+	router.HandleFunc("/upload", uploadFilesHandler).Methods("POST")
+	router.HandleFunc("/flashcards", flashcardsHandler).Methods("GET")
 
-	result, err := rdb.Get(ctx, "foo").Result()
-
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(result) // >>> bar
+	log.Println("server running on localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-func main() {
-	ExampleClient_connect_basic()
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		
+		next.ServeHTTP(w, r)
+	})
 }
