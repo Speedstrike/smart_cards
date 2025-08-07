@@ -23,6 +23,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:smart_cards/frontend/screens/scan_screen.dart';
 import 'package:smart_cards/frontend/screens/upload_screen.dart';
+import 'package:smart_cards/frontend/screens/ai_screen.dart';
 
 import '../constants.dart';
 import '../flashcard_deck.dart';
@@ -117,7 +118,11 @@ class CreateScreen extends StatelessWidget {
                     title: Constants.aiTitle,
                     description: Constants.aiSubtitle,
                     onTap: () {
-                      // TODO
+                      Navigator.of(context).push(
+                        CupertinoPageRoute(
+                          builder: (context) => const AIScreen()
+                        )
+                      );
                     }
                   )
                 ]
